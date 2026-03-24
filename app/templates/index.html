@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}홈 - {{ site_name }}{% endblock %}
+
+{% block content %}
+
+<script>
+async function handleLogin(e) {
+    e.preventDefault();
+    const response = await fetch("/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            email: document.getElementById("email").value,
+            password: document.getElementById("password").value
+        })
+    });
+
+    const data = await response.json();
+    localStorage.setItem("access_token", data.access_token);
+    localStorage.setItem("refresh_token", data.refresh_token);
+
+    window.location.href = "/";
+}
+
+async function handleLogout(e) {
+    e.preventDefault();
+    await fetch("/auth/logout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            refresh_token: localStorage.getItem("refresh_token")
+        })
+    });
+
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+
+    window.location.href = "/";
+}
+
+async function handleLoginWithSession(e) {
+    e.preventDefault();
+    const response = await fetch("/auth/login-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            email: document.getElementById("email").value,
+            password: document.getElementById("password").value
+        })
+    });
+
+    if (response.ok) {
+        window.location.href = "/";
+    } else {
+        const data = await response.json();
+        alert(data.detail);  // "이메일 또는 비밀번호가 올바르지 않습니다."
+    }
+}
+
+async function handleLogoutWithSession(e) {
+    e.preventDefault();
+    await fetch("/auth/logout-session", {
+        method: "POST",
+        credentials: "include"
+    });
+
+    window.location.href = "/";
+}
+
+</script>
+<div>
+    <h1>{{ site_name }}에 오신 것을 환영합니다.</h1>
+    <form onsubmit="handleLoginWithSession(event)">
+        <p>아이디: <input type="text" id="email"></p>
+        <p>비밀번호: <input type="password" id="password"></p>
+        <input type="submit" value="Login">
+    </form>
+    <button onclick="handleLogoutWithSession(event)">Logout</button>
+</div>
+{% endblock %}
