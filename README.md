@@ -18,11 +18,12 @@ app/&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;# �
 ├── .gitignore&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;# 버전관리를 하지 않을 파일들을 명시해 두는 곳  
 └── pyproject.toml&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;# 패키지 관리하는 파일  
 
-
+앱을 실행하기 전에 아래 명령어 실행
 ```bash
 $env:PYTHONPATH = "app"
 ```
 
+앱 실행
 ```bash
 uvicorn app.main:app --reload
 ```
