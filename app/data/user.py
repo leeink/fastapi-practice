@@ -3,9 +3,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy import String, Boolean
 
-from app.core.database import Base
-
-class User(Base):
+class User:
     __tablename__ = "siteuser"
 
     id: Mapped[uuid.UUID] = mapped_column(

@@ -17,3 +17,12 @@ app/&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;# �
 ├── main.py&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;# 앱을 실행하는 파일  
 ├── .gitignore&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;# 버전관리를 하지 않을 파일들을 명시해 두는 곳  
 └── pyproject.toml&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;# 패키지 관리하는 파일  
+
+
+```bash
+$env:PYTHONPATH = "app"
+```
+
+```bash
+uvicorn app.main:app --reload
+```

@@ -1,9 +1,8 @@
-from fastapi import FastAPI, Request
-from fastapi.middleware.cors import CORSMiddleware
 from pathlib import Path
 
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 from starlette.staticfiles import StaticFiles
-from starlette.templating import Jinja2Templates
 
 from app.router import user_router
 from core.config import templates
