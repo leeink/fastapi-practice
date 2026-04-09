@@ -5,10 +5,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.staticfiles import StaticFiles
 
 from app.router import user_router
-from core.config import templates
-
-BASE_DIR = Path(__file__).resolve().parent
-STATIC_DIR = BASE_DIR / "static"
+from core.config import templates, STATIC_DIR
+from router import sales_router
 
 app = FastAPI(
     title="Sync Base FastAPI",
@@ -26,6 +24,7 @@ app.add_middleware(
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 app.include_router(user_router.router)
+app.include_router(sales_router.router)
 @app.get("/")
 def index(request: Request):
     return templates.TemplateResponse(

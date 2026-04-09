@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}홈 - {{ site_name }}{% endblock %}
+
+{% block content %}
+    <div>
+        <canvas id="revenueChart" width="800" height="400"></canvas>
+    </div>
+    <script>
+        const labels = [{% for revenue in revenues %}"{{ revenue.year }}"{% if not loop.last %}, {% endif %}{% endfor %}];
+        const values = [{% for revenue in revenues %}{{ revenue.revenue }}{% if not loop.last %}, {% endif %}{% endfor %}];
+
+        const ctx = document.getElementById('revenueChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: '매출액',
+                    data: values,
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {position: 'right'},
+                    title: {
+                        display: true,
+                        text: '연도별 매출액'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function (value) {
+                                return value.toLocaleString() + '원';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+{% endblock %}

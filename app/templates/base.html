@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{{ site_name }}{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.0/chart.umd.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     {% block head %}{% endblock %}
 </head>
 <body>
@@ -12,9 +13,10 @@
         <div class="nav-container">
             <a class="nav-logo" href="/">{{ site_name }}</a>
             <ul class="nav-bar">
-                <li><a class="nav-link" href="/">호호</a></li>
-                <li><a class="nav-link" href="/">호호</a></li>
-                <li><a class="nav-link" href="/">호호</a></li>
+                <li><a class="nav-link" href="/sales/all">모든 매출 보기</a></li>
+                <li><a class="nav-link" href="/sales/byYear">연도별 매출 보기</a></li>
+                <li><a class="nav-link" href="/sales/byRegion">지역별 매출 보기</a></li>
+                <li><a class="nav-link" href="/sales/byProduct">제품별 매출 보기</a></li>
             </ul>
         </div>
     </nav>

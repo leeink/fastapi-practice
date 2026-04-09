@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}홈 - {{ site_name }}{% endblock %}
+
+{% block content %}
+
+<div>
+    <form class="search-selection" action="{{ url_for('search_revenue') }}">
+        <select name="year" id="year">
+            <option value="" selected disabled hidden>연도</option>
+            <option value="2023">2023</option>
+            <option value="2024">2024</option>
+            <option value="2025">2025</option>
+        </select>
+        <select name="region" id="region">
+            <option value="" selected disabled hidden>지역 선택</option>
+            <option value="North">North</option>
+            <option value="South">South</option>
+            <option value="West">West</option>
+            <option value="East">East</option>
+        </select>
+        <select name="product_line" id="product_line">
+            <option value="" selected disabled hidden>제품 선택</option>
+            <option value="Furniture">Furniture</option>
+            <option value="Electronics">Electronics</option>
+            <option value="Food">Food</option>
+            <option value="Clothing">Clothing</option>
+        </select>
+        <input type="submit" value="검색">
+    </form>
+    <table>
+        <thead>
+            <tr>
+                <th>날짜</th>
+                <th>분기</th>
+                <th>지역</th>
+                <th>제품군</th>
+                <th>판매량</th>
+                <th>마케팅 비용</th>
+                <th>매출</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for sale in sales %}
+                <tr>
+                    <td>{{ sale.date }}</td>
+                    <td>{{ sale.quarter }}</td>
+                    <td>{{ sale.region }}</td>
+                    <td>{{ sale.product_line }}</td>
+                    <td>{{ sale.units_sold }}</td>
+                    <td>{{ sale.marketing_spend }}</td>
+                    <td>{{ sale.revenue }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
