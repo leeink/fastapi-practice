@@ -4,44 +4,27 @@ from sqlalchemy.orm import Session
 from starlette import status
 from starlette.responses import HTMLResponse
 
-from core.database import get_db
 from core.config import templates
-
-from schema.sales_schema import SalesList, SalesFilterRequest
-from service.sales_service import find_all_sales, find_sales_by_year, find_revenue_by_product, find_revenue_by_region, \
-    find_revenue_by_year, find_revenue_by_filter
+from core.database import get_db
+from schema.sales_schema import SalesFilterRequest
+from service.sales_service import find_revenue_by_product, find_revenue_by_region, \
+    find_revenue_by_year, find_all_stats_by_filter
 
 router = APIRouter(prefix="/sales", tags=["sales"])
-
-@router.get("/all",
-            response_class=HTMLResponse,
-            status_code=status.HTTP_200_OK,
-            summary="Show sales list")
-def get_all_sales(request: Request, db: Session = Depends(get_db)):
-    sales = find_all_sales(db)
-    return templates.TemplateResponse(
-        request,
-        "revenue_all.html",
-        {
-            "site_name" : "Sales Main",
-            "sales" : sales
-        }
-    )
 
 @router.get("/search",
             response_class=HTMLResponse,
             status_code=status.HTTP_200_OK)
-def search_revenue(
-    request: Request,
-    dto: SalesFilterRequest = Depends(),
-    db: Session = Depends(get_db)):
-    revenues = find_revenue_by_filter(db, dto)
+def search_revenue(request: Request,
+                   dto: SalesFilterRequest = Depends(), db: Session = Depends(get_db)):
+    data = find_all_stats_by_filter(db, dto)
     return templates.TemplateResponse(
         request,
         "revenue_all.html",
         {
             "site_name" : "Revenue",
-            "sales" : revenues
+            "data" : data,
+            "selected_filter" : dto.filter
         }
     )
 

@@ -1,6 +1,7 @@
 import datetime
 
 from pydantic import BaseModel
+from typing import Optional
 import uuid
 
 class SalesList(BaseModel):
@@ -17,7 +18,4 @@ class SalesList(BaseModel):
     revenue: int
 
 class SalesFilterRequest(BaseModel):
-    year: str | None = None
-    quarter: str | None = None
-    region: str | None = None
-    product_line: str | None = None
+    filter: str = "product_line"

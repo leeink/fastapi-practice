@@ -4,55 +4,206 @@
 
 {% block content %}
 
-<div>
-    <form class="search-selection" action="{{ url_for('search_revenue') }}">
-        <select name="year" id="year">
-            <option value="" selected disabled hidden>연도</option>
-            <option value="2023">2023</option>
-            <option value="2024">2024</option>
-            <option value="2025">2025</option>
-        </select>
-        <select name="region" id="region">
-            <option value="" selected disabled hidden>지역 선택</option>
-            <option value="North">North</option>
-            <option value="South">South</option>
-            <option value="West">West</option>
-            <option value="East">East</option>
-        </select>
-        <select name="product_line" id="product_line">
-            <option value="" selected disabled hidden>제품 선택</option>
-            <option value="Furniture">Furniture</option>
-            <option value="Electronics">Electronics</option>
-            <option value="Food">Food</option>
-            <option value="Clothing">Clothing</option>
-        </select>
-        <input type="submit" value="검색">
-    </form>
-    <table>
-        <thead>
-            <tr>
-                <th>날짜</th>
-                <th>분기</th>
-                <th>지역</th>
-                <th>제품군</th>
-                <th>판매량</th>
-                <th>마케팅 비용</th>
-                <th>매출</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for sale in sales %}
-                <tr>
-                    <td>{{ sale.date }}</td>
-                    <td>{{ sale.quarter }}</td>
-                    <td>{{ sale.region }}</td>
-                    <td>{{ sale.product_line }}</td>
-                    <td>{{ sale.units_sold }}</td>
-                    <td>{{ sale.marketing_spend }}</td>
-                    <td>{{ sale.revenue }}</td>
-                </tr>
+    <div>
+        <form class="search-selection" action="{{ url_for('search_revenue') }}">
+            <select name="filter" id="filter">
+                <option value="" selected disabled hidden {% if not selected_filter %}selected{% endif %}>필터 조건 선택</option>
+                <option value="product_line" {% if selected_filter == 'product_line' %}selected{% endif %}>제품군</option>
+                <option value="region" {% if selected_filter == 'region' %}selected{% endif %}>지역</option>
+            </select>
+        </form>
+        <div>
+            <canvas id="revenueChart" width="800" height="400"></canvas>
+        </div>
+        <div>
+            <canvas id="marketingChart" width="800" height="400"></canvas>
+        </div>
+        <div>
+            <canvas id="soldUnitsChart" width="800" height="400"></canvas>
+        </div>
+    </div>
+    <script>
+        document.getElementById('filter').addEventListener('change', function() {
+            // 셀렉트 박스 값이 바뀌면 부모 폼을 찾아서 전송함
+            this.form.submit();
+        });
+    </script>
+    <script>
+        const raw = [
+            {% for row in data %}
+            {
+                year: "{{ row.year }}",
+                label: "{{ row.label }}",
+                revenue: {{ row.revenue|default(0) }},
+                spend: {{ row.spend|default(0) }},
+                units: {{ row.units|default(0) }}
+            }{% if not loop.last %},{% endif %}
             {% endfor %}
-        </tbody>
-    </table>
-</div>
+        ];
+
+        const years = [...new Set(raw.map(d => d.year))].sort();
+        const labels = [...new Set(raw.map(d => d.label))];
+        const colors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'];
+
+        // --- 스타일링 ---
+        const tension = 0;              // 곡선 완만함
+        const legendPos = 'top';        // 범례 위치
+        const borderWidth = 4;           // 선의 굵기 (숫자가 클수록 굵어짐, 기본값은 보통 3)
+        const pointRadius = 5;           // 데이터 지점의 점 크기
+        const pointBorderWidth = 2;      // 점 테두리 두께
+        const pointHoverRadius = 8;      // 마우스를 올렸을 때 점의 크기
+        // -------------------------
+
+        const revenueDatasets = labels.map((label, index) => {
+            return {
+                label: label,
+                data: years.map((year) => {
+                    const found = raw.find(d => d.year === year && d.label === label);
+                    return found ? found.revenue : 0;
+                }),
+                borderColor: colors[index % colors.length],
+                fill: false,
+                tension: tension,
+                borderWidth: borderWidth,
+                pointRadius: pointRadius,
+                pointBorderWidth: pointBorderWidth,
+                pointHoverRadius: pointHoverRadius,
+                pointBackgroundColor : colors[index % colors.length],
+            }
+        })
+        const spendDatasets = labels.map((label, index) => {
+            return {
+                label: label,
+                data: years.map((year) => {
+                    const found = raw.find(d => d.year === year && d.label === label);
+                    return found ? found.spend : 0;
+                }),
+                borderColor: colors[index % colors.length],
+                fill: false,
+                tension: tension,
+                borderWidth: borderWidth,
+                pointRadius: pointRadius,
+                pointBorderWidth: pointBorderWidth,
+                pointHoverRadius: pointHoverRadius,
+                pointBackgroundColor : colors[index % colors.length],
+
+            }
+        })
+        const unitsDatasets = labels.map((label, index) => {
+            return {
+                label: label,
+                data: years.map((year) => {
+                    const found = raw.find(d => d.year === year && d.label === label);
+                    return found ? found.units : 0;
+                }),
+                borderColor: colors[index % colors.length],
+                fill: false,
+                tension: tension,
+                borderWidth: borderWidth,
+                pointRadius: pointRadius,
+                pointBorderWidth: pointBorderWidth,
+                pointHoverRadius: pointHoverRadius,
+                pointBackgroundColor : colors[index % colors.length],
+            }
+        })
+
+        const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+        new Chart(revenueCtx, {
+            type: 'line',
+            data: {
+                labels: years,
+                datasets: revenueDatasets,
+            },
+            options: {
+                responsive: true,
+                interaction:{
+                    mode: 'index',
+                    intersect: false,
+                },
+                plugins: {
+                    legend: {position: legendPos},
+                    title: {
+                        display: true,
+                        text: '연도별 매출액'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function (value) {
+                                return value.toLocaleString() + '원';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        const marketingCtx = document.getElementById('marketingChart').getContext('2d');
+        new Chart(marketingCtx, {
+            type: 'line',
+            data: {
+                labels: years,
+                datasets: spendDatasets,
+            },
+            options: {
+                responsive: true,
+                interaction:{
+                    mode: 'index',
+                    intersect: false,
+                },
+                plugins: {
+                    legend: {position: legendPos},
+                    title: {
+                        display: true,
+                        text: '연도별 마케팅 비용'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function (value) {
+                                return value.toLocaleString() + '원';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        const soldUnitsCtx = document.getElementById('soldUnitsChart').getContext('2d');
+        new Chart(soldUnitsCtx, {
+            type: 'line',
+            data: {
+                labels: years,
+                datasets: unitsDatasets
+            },
+            options: {
+                responsive: true,
+                interaction:{
+                    mode: 'index',
+                    intersect: false,
+                },
+                plugins: {
+                    legend: {position: legendPos},
+                    title: {
+                        display: true,
+                        text: '연도별 판매량'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function (value) {
+                                return value.toLocaleString() + '개';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
 {% endblock %}

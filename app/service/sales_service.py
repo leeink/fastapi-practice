@@ -56,17 +56,20 @@ def find_revenue_by_year(db: Session):
     )
     return result.all()
 
-def find_revenue_by_filter(db: Session, dto: SalesFilterRequest):
-    query = (select(Sales.date, Sales.region, Sales.product_line, Sales.units_sold, Sales.marketing_spend,
-                    func.sum(Sales.revenue).over(partition_by=Sales.year).label("revenue")))
+## 연도별 추이: 매출, 마케팅 비용, 판매량
+def find_all_stats_by_filter(db: Session, dto: SalesFilterRequest):
+    group_col = getattr(Sales, dto.filter)
 
-    if dto.year:
-        query = query.where(Sales.year == dto.year)
-    if dto.region:
-        query = query.where(Sales.region == dto.region)
-    if dto.quarter:
-        query = query.where(Sales.quarter == dto.quarter)
-    if dto.product_line:
-        query = query.where(Sales.product_line == dto.product_line)
+    query = (
+        select(
+            Sales.year,
+            group_col.label("label"),
+            func.sum(Sales.revenue).label("revenue"),
+            func.sum(Sales.marketing_spend).label("spend"),
+            func.sum(Sales.units_sold).label("units")
+        )
+        .group_by(Sales.year, group_col)
+        .order_by(Sales.year)
+    )
 
     return db.execute(query).all()
